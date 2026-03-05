@@ -28,7 +28,7 @@ jobs:
           LATEST=$(curl -fsSL \
             -H "Authorization: Bearer ${GH_TOKEN}" \
             "https://api.github.com/repos/moeru-ai/airi/releases/latest" \
-            | jq -r '.tag_name' | sed 's/^v//')
+            | jq -r '.tag_name' | sed 's/^v//' | tr '-' '_')
 
           CURRENT=$(grep '^pkgver=' pkgbuilds/airi-bin/PKGBUILD | cut -d= -f2)
 

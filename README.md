@@ -1,8 +1,8 @@
 # AIRI Pacman Repository
 
-[![Build Pacman Repo](https://github.com/moeru-ai/airi-pacman-repo/actions/workflows/build-repo.yml/badge.svg)](https://github.com/moeru-ai/airi-pacman-repo/actions/workflows/build-repo.yml)
-[![GitHub Release](https://img.shields.io/github/v/release/moeru-ai/airi-pacman-repo?label=latest%20build)](https://github.com/moeru-ai/airi-pacman-repo/releases/tag/latest)
-[![License](https://img.shields.io/github/license/moeru-ai/airi-pacman-repo)](LICENSE)
+[![Build Pacman Repo](https://github.com/Fahry-a/airi-pacman-repo/actions/workflows/build-repo.yml/badge.svg)](https://github.com/Fahry-a/airi-pacman-repo/actions/workflows/build-repo.yml)
+[![GitHub Release](https://img.shields.io/github/v/release/Fahry-a/airi-pacman-repo?label=latest%20build)](https://github.com/Fahry-a/airi-pacman-repo/releases/tag/latest)
+[![License](https://img.shields.io/github/license/moeru-ai/airi)](LICENSE)
 
 Arch Linux package repository for **AIRI** - a self-hosted AI companion application.
 
@@ -35,7 +35,7 @@ sudo pacman -Sy airi-bin
 
 ```bash
 # Clone the repository
-git clone https://github.com/moeru-ai/airi-pacman-repo.git
+git clone https://github.com/Fahry-a/airi-pacman-repo.git
 cd airi-pacman-repo/pkgbuilds/airi-bin
 
 # Build and install
