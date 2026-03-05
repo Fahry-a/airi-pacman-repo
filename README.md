@@ -31,6 +31,12 @@ Server = https://github.com/Fahry-a/airi-pacman-repo/releases/download/latest
 sudo pacman -Sy airi-bin
 ```
 
+3. Install the package:
+
+'''bash
+sudo pacman -S airi-bin
+'''
+
 ### Option 2: Manual Installation from AUR
 
 ```bash
