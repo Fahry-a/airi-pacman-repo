@@ -134,10 +134,10 @@ jobs:
         run: |
           TAG="latest"
 
-          # Hapus release lama kalau ada, lalu buat baru
+          # Update the release assets instead of deleting and recreating
           gh release delete "${TAG}" --yes 2>/dev/null || true
-          git push origin ":refs/tags/${TAG}" 2>/dev/null || true
-
+          
+          # Create new release with updated assets
           gh release create "${TAG}" \
             --title "Latest Build (v${NEW_VER})" \
             --notes "🤖 Auto-built • airi-bin v${NEW_VER} • $(date -u '+%Y-%m-%d %H:%M UTC')" \
