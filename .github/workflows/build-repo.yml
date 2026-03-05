@@ -113,8 +113,8 @@ jobs:
           mkdir -p repo-out
           cp pkgbuilds/airi-bin/*.pkg.tar.zst repo-out/
           cd repo-out
-          repo-add myrepo.db.tar.gz *.pkg.tar.zst
-          # repo-add juga generate: myrepo.db, myrepo.files, myrepo.files.tar.gz
+          repo-add airi-repo.db.tar.gz *.pkg.tar.zst
+          # repo-add juga generate: airi-repo.db, airi-repo.files, airi-repo.files.tar.gz
 
       # ── Commit perubahan PKGBUILD & .SRCINFO ke repo ─────────────────────
       - name: Commit PKGBUILD changes
@@ -143,7 +143,7 @@ jobs:
             --notes "🤖 Auto-built • airi-bin v${NEW_VER} • $(date -u '+%Y-%m-%d %H:%M UTC')" \
             --latest \
             repo-out/*.pkg.tar.zst \
-            repo-out/myrepo.db.tar.gz \
-            repo-out/myrepo.db \
-            repo-out/myrepo.files.tar.gz \
-            repo-out/myrepo.files
+            repo-out/airi-repo.db.tar.gz \
+            repo-out/airi-repo.db \
+            repo-out/airi-repo.files.tar.gz \
+            repo-out/airi-repo.files
