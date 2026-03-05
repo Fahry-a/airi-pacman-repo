@@ -1,0 +1,146 @@
+name: Build Pacman Repo
+
+on:
+  schedule:
+    - cron: '0 20 * * *'  # Jam 3 pagi WIB (UTC+7 = UTC-7jam → 20:00 UTC)
+  workflow_dispatch:       # Bisa trigger manual juga
+
+permissions:
+  contents: write
+
+jobs:
+  # ─── Job 1: Cek versi terbaru upstream ───────────────────────────────────
+  check:
+    runs-on: ubuntu-latest
+    outputs:
+      should_build: ${{ steps.check.outputs.should_build }}
+      new_version:  ${{ steps.check.outputs.new_version }}
+      old_version:  ${{ steps.check.outputs.old_version }}
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Cek versi upstream vs PKGBUILD
+        id: check
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          LATEST=$(curl -fsSL \
+            -H "Authorization: Bearer ${GH_TOKEN}" \
+            "https://api.github.com/repos/moeru-ai/airi/releases/latest" \
+            | jq -r '.tag_name' | sed 's/^v//')
+
+          CURRENT=$(grep '^pkgver=' pkgbuilds/airi-bin/PKGBUILD | cut -d= -f2)
+
+          echo "new_version=${LATEST}" >> $GITHUB_OUTPUT
+          echo "old_version=${CURRENT}" >> $GITHUB_OUTPUT
+
+          if [ "${LATEST}" != "${CURRENT}" ] || [ "${{ github.event_name }}" = "workflow_dispatch" ]; then
+            echo "should_build=true" >> $GITHUB_OUTPUT
+            echo "🆕 Update: ${CURRENT} → ${LATEST}"
+          else
+            echo "should_build=false" >> $GITHUB_OUTPUT
+            echo "✅ Sudah up-to-date: ${CURRENT}"
+          fi
+
+  # ─── Job 2: Build & Release ──────────────────────────────────────────────
+  build:
+    needs: check
+    if: needs.check.outputs.should_build == 'true'
+    runs-on: ubuntu-latest
+    container:
+      image: archlinux:latest
+
+    steps:
+      - name: Install tools
+        run: |
+          pacman-key --init
+          pacman -Syu --noconfirm
+          pacman -S --noconfirm \
+            base-devel git curl wget jq binutils github-cli
+
+      - uses: actions/checkout@v4
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Setup git
+        run: |
+          git config --global user.name  "github-actions[bot]"
+          git config --global user.email "github-actions[bot]@users.noreply.github.com"
+          git config --global --add safe.directory "${GITHUB_WORKSPACE}"
+
+      - name: Buat user builder (makepkg tidak bisa root)
+        run: useradd -m builder
+
+      # ── Update versi di PKGBUILD (skip kalau manual trigger versi sama) ──
+      - name: Update pkgver & pkgrel
+        if: needs.check.outputs.new_version != needs.check.outputs.old_version
+        env:
+          NEW_VER: ${{ needs.check.outputs.new_version }}
+        run: |
+          sed -i "s/^pkgver=.*/pkgver=${NEW_VER}/" pkgbuilds/airi-bin/PKGBUILD
+          sed -i "s/^pkgrel=.*/pkgrel=1/"          pkgbuilds/airi-bin/PKGBUILD
+          echo "PKGBUILD diupdate ke ${NEW_VER}"
+
+      # ── Hitung ulang sha256sums (download source baru lalu hash) ─────────
+      - name: Update checksums (updpkgsums)
+        run: |
+          chown -R builder pkgbuilds/airi-bin
+          cd pkgbuilds/airi-bin
+          su builder -c "updpkgsums"
+
+      # ── Regenerate .SRCINFO ───────────────────────────────────────────────
+      - name: Generate .SRCINFO
+        run: |
+          cd pkgbuilds/airi-bin
+          su builder -c "makepkg --printsrcinfo" > .SRCINFO
+
+      # ── Build .pkg.tar.zst ────────────────────────────────────────────────
+      - name: Build package
+        run: |
+          chown -R builder pkgbuilds/airi-bin
+          cd pkgbuilds/airi-bin
+          # -d  → skip cek runtime deps (electron40 tidak perlu ter-install saat build)
+          # -s  → install missing makedepends otomatis
+          su builder -c "makepkg -sd --noconfirm --skippgpcheck"
+
+      # ── Buat database pacman ──────────────────────────────────────────────
+      - name: Build repo database
+        run: |
+          mkdir -p repo-out
+          cp pkgbuilds/airi-bin/*.pkg.tar.zst repo-out/
+          cd repo-out
+          repo-add myrepo.db.tar.gz *.pkg.tar.zst
+          # repo-add juga generate: myrepo.db, myrepo.files, myrepo.files.tar.gz
+
+      # ── Commit perubahan PKGBUILD & .SRCINFO ke repo ─────────────────────
+      - name: Commit PKGBUILD changes
+        if: needs.check.outputs.new_version != needs.check.outputs.old_version
+        env:
+          NEW_VER: ${{ needs.check.outputs.new_version }}
+        run: |
+          git add pkgbuilds/airi-bin/PKGBUILD pkgbuilds/airi-bin/.SRCINFO
+          git commit -m "chore(airi-bin): bump to v${NEW_VER}" || echo "Tidak ada perubahan"
+          git push
+
+      # ── Upload semua file ke GitHub Release tag "latest" ─────────────────
+      - name: Upload ke GitHub Release
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          NEW_VER:  ${{ needs.check.outputs.new_version }}
+        run: |
+          TAG="latest"
+
+          # Hapus release lama kalau ada, lalu buat baru
+          gh release delete "${TAG}" --yes 2>/dev/null || true
+          git push origin ":refs/tags/${TAG}" 2>/dev/null || true
+
+          gh release create "${TAG}" \
+            --title "Latest Build (v${NEW_VER})" \
+            --notes "🤖 Auto-built • airi-bin v${NEW_VER} • $(date -u '+%Y-%m-%d %H:%M UTC')" \
+            --latest \
+            repo-out/*.pkg.tar.zst \
+            repo-out/myrepo.db.tar.gz \
+            repo-out/myrepo.db \
+            repo-out/myrepo.files.tar.gz \
+            repo-out/myrepo.files
