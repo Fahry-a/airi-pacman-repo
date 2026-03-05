@@ -78,10 +78,18 @@ jobs:
         env:
           NEW_VER: ${{ needs.check.outputs.new_version }}
         run: |
+          # Kembalikan hyphen untuk URL (tag GitHub aslinya)
+          TAG_VER=$(echo "${NEW_VER}" | tr '_' '-')
+
           sed -i "s/^pkgver=.*/pkgver=${NEW_VER}/" pkgbuilds/airi-bin/PKGBUILD
           sed -i "s/^pkgrel=.*/pkgrel=1/"          pkgbuilds/airi-bin/PKGBUILD
-          echo "PKGBUILD diupdate ke ${NEW_VER}"
 
+          # Update _pkgver atau URL kalau ada referensi tag eksplisit
+          # (jika PKGBUILD pakai v${pkgver} di source URL)
+          sed -i "s|/v[0-9][^/]*/|/v${TAG_VER}/|g" pkgbuilds/airi-bin/PKGBUILD
+
+          echo "PKGBUILD diupdate ke ${NEW_VER} (tag: v${TAG_VER})"
+          
       # ── Hitung ulang sha256sums (download source baru lalu hash) ─────────
       - name: Update checksums (updpkgsums)
         run: |
