@@ -33,9 +33,9 @@ sudo pacman -Sy airi-bin
 
 3. Install the package:
 
-'''bash
+```bash
 sudo pacman -S airi-bin
-'''
+```
 
 ### Option 2: Manual Installation from AUR
 
