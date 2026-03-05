@@ -22,7 +22,7 @@ Arch Linux package repository for **AIRI** - a self-hosted AI companion applicat
 ```ini
 [airi-repo]
 SigLevel = Optional
-Server = https://github.com/moeru-ai/airi-pacman-repo/releases/download/latest
+Server = https://github.com/Fahry-a/airi-pacman-repo/releases/download/latest
 ```
 
 2. Update pacman and install AIRI:
