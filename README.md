@@ -32,11 +32,10 @@ AIRI is a self-hosted Grok Companion, a container of souls of waifu and cyber li
    Server = https://github.com/Fahry-a/airi-pacman-repo/releases/download/latest
    ```
 
-2. Refresh package databases and install:
+2. Refresh package databases and install AIRI:
 
    ```bash
-   sudo pacman -Sy
-   sudo pacman -S airi-bin
+   sudo pacman -Sy airi-bin
    ```
 
 ### Option 2: Manual Installation from AUR

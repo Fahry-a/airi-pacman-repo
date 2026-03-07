@@ -86,6 +86,9 @@ repo-add airi-repo.db.tar.gz *.pkg.tar.zst
 - Use `set -euo pipefail` for strict error handling
 - Handle empty variables with `${VAR:-default}` syntax
 - Use `[[ ]]` for conditionals (bash-specific)
+- **Security**: Never load user-controlled config files when running as root
+- **Security**: Filter dangerous flags (`--gpu-launcher`, `--inspect*, `--remote-debugging*`, `--js-flags*`)
+- **Security**: Verify file ownership and permissions before reading config files
 
 ### CI/CD Workflow
 - All comments in English
