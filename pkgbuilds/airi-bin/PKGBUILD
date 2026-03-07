@@ -2,7 +2,7 @@
 
 pkgname=airi-bin
 _pkgname=AIRI
-pkgver=0.9.0_alpha.1
+pkgver=0.9.0_alpha.2
 _tag_ver=$(echo "${pkgver}" | tr '_' '-')
 _electronversion=40
 pkgrel=1
@@ -29,8 +29,8 @@ source_aarch64=("${pkgname%-bin}-${pkgver}-aarch64.rpm::${_ghurl}/releases/downl
 source_x86_64=("${pkgname%-bin}-${pkgver}-x86_64.rpm::${_ghurl}/releases/download/v${_tag_ver}/${_pkgname}-${_tag_ver}-linux-x86_64.rpm")
 sha256sums=('f334260edf0508041280b534ca9d0abd5a02a9626c1d2e20a556ac4eb72b07f9'
             '59bcccb0397373ba69c2fdf28aee8b244e4601248cff391a79a4b18feab7bc18')
-sha256sums_aarch64=('eaa6015a68d140ee9301277417632f4b0d7928019a924f603dc0709a6c7a82b9')
-sha256sums_x86_64=('0b8a51fe086cd31d7a847ee490e13fcdf5db3e952ea2e9186e2b975c2c761949')
+sha256sums_aarch64=('2469617a03aac2ec6c58436b60925c3f18489d3022b1e80ebe82389edd77b876')
+sha256sums_x86_64=('d398ae9c3cfa57d5ffbbdfd407673349038510233d95c7953e58ddd8d8d4c49f')
 
 _get_electron_version() {
   local _elec_ver="$(strings "${srcdir}/opt/${_pkgname}/${pkgname%-bin}" | grep '^Chrome/[0-9.]* Electron/[0-9]' | cut -d'/' -f3 | cut -d'.' -f1)"
