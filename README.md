@@ -2,16 +2,23 @@
 
 [![Build Pacman Repo](https://github.com/Fahry-a/airi-pacman-repo/actions/workflows/build-repo.yml/badge.svg)](https://github.com/Fahry-a/airi-pacman-repo/actions/workflows/build-repo.yml)
 [![GitHub Release](https://img.shields.io/github/v/release/Fahry-a/airi-pacman-repo?label=latest%20build)](https://github.com/Fahry-a/airi-pacman-repo/releases/tag/latest)
-[![License](https://img.shields.io/github/license/moeru-ai/airi)](LICENSE)
+[![License](https://img.shields.io/github/license/moeru-ai/airi)](https://github.com/moeru-ai/airi/blob/main/LICENSE)
 
 Arch Linux package repository for **AIRI** - a self-hosted AI companion application.
 
 ## About AIRI
 
-💖🧸 AIRI is a self-hosted Grok Companion, a container of souls of waifu, cyber livings to bring them into our worlds, wishing to achieve Neuro-sama's altitude.
+AIRI is a self-hosted Grok Companion, a container of souls of waifu and cyber livings, bringing them into our world.
 
 - **Upstream Project**: [moeru-ai/airi](https://github.com/moeru-ai/airi)
 - **Documentation**: [airi.moeru.ai/docs](https://airi.moeru.ai/docs/)
+
+## Features
+
+- Prebuilt packages for `x86_64` and `aarch64` architectures
+- Uses system Electron (smaller download, better integration)
+- Automatic daily builds via GitHub Actions
+- Wayland native support
 
 ## Installation
 
@@ -19,23 +26,17 @@ Arch Linux package repository for **AIRI** - a self-hosted AI companion applicat
 
 1. Add the repository to your `/etc/pacman.conf`:
 
-```ini
-[airi-repo]
-SigLevel = Optional
-Server = https://github.com/Fahry-a/airi-pacman-repo/releases/download/latest
-```
+   ```ini
+   [airi-repo]
+   SigLevel = Optional
+   Server = https://github.com/Fahry-a/airi-pacman-repo/releases/download/latest
+   ```
 
-2. Update pacman and install AIRI:
+2. Refresh package databases and install AIRI:
 
-```bash
-sudo pacman -Sy airi-bin
-```
-
-3. Install the package:
-
-```bash
-sudo pacman -S airi-bin
-```
+   ```bash
+   sudo pacman -Sy airi-bin
+   ```
 
 ### Option 2: Manual Installation from AUR
 
@@ -50,7 +51,7 @@ makepkg -si
 
 ### Option 3: Download from Releases
 
-Download the latest `.pkg.tar.zst` package from the [releases page](https://github.com/moeru-ai/airi-pacman-repo/releases/tag/latest) and install:
+Download the latest `.pkg.tar.zst` package from the [releases page](https://github.com/Fahry-a/airi-pacman-repo/releases/tag/latest) and install:
 
 ```bash
 sudo pacman -U airi-bin-*.pkg.tar.zst
@@ -58,17 +59,19 @@ sudo pacman -U airi-bin-*.pkg.tar.zst
 
 ## Package Information
 
-| Field | Value |
-|-------|-------|
-| **Package Name** | `airi-bin` |
-| **License** | MIT |
-| **Architecture** | x86_64, aarch64 |
-| **Dependencies** | `electron40`, `xsel` |
-| **Provides** | `airi` |
+| Field           | Value                       |
+|-----------------|-----------------------------|
+| Package Name    | `airi-bin`                  |
+| License         | MIT                         |
+| Architecture    | x86_64, aarch64             |
+| Dependencies    | `electron40`, `xsel`        |
+| Provides        | `airi`                      |
 
 ## Usage
 
-After installation, you can launch AIRI from your application menu or via terminal:
+### Launch Application
+
+From your application menu or terminal:
 
 ```bash
 airi
@@ -76,35 +79,36 @@ airi
 
 ### Wayland Support
 
-To run AIRI with Wayland native support:
+Run with native Wayland support:
 
 ```bash
 airi --wayland
 ```
 
-### Configuration
+### Custom Flags
 
-You can add custom flags by creating a configuration file at `~/.config/airi-flags.conf`. Each line should contain one flag.
+Create `~/.config/airi-flags.conf` with one flag per line:
+
+```bash
+# Example: Enable hardware acceleration
+--enable-gpu-rasterization
+--enable-zero-copy
+```
 
 ## Automated Builds
 
-This repository includes a GitHub Actions workflow that:
+This repository uses GitHub Actions for automated package builds:
 
-- **Daily Check**: Automatically checks for new AIRI releases at 20:00 UTC (03:00 WIB)
-- **Auto-Build**: Builds new packages when upstream releases a new version
-- **Auto-Release**: Publishes packages to the `latest` release tag
-- **Repository Database**: Generates pacman repository database files
+| Feature           | Description                                      |
+|-------------------|--------------------------------------------------|
+| Schedule          | Daily at 20:00 UTC (03:00 WIB)                   |
+| Auto-update       | Detects new upstream releases automatically      |
+| Multi-arch        | Builds for both x86_64 and aarch64               |
+| Auto-release      | Publishes to GitHub Releases                     |
 
-The workflow automatically:
-1. Fetches the latest version from upstream
-2. Updates `PKGBUILD` and `.SRCINFO`
-3. Builds the package for both x86_64 and aarch64
-4. Creates a pacman-compatible repository database
-5. Commits changes and publishes to GitHub Releases
+### Manual Trigger
 
-## Manual Trigger
-
-You can manually trigger a build by going to the [Actions tab](https://github.com/moeru-ai/airi-pacman-repo/actions) and running the "Build Pacman Repo" workflow.
+Go to [Actions](https://github.com/Fahry-a/airi-pacman-repo/actions) and run the "Build Pacman Repo" workflow.
 
 ## Directory Structure
 
@@ -115,14 +119,42 @@ airi-pacman-repo/
 │       ├── PKGBUILD      # Arch package build script
 │       ├── .SRCINFO      # AUR metadata
 │       └── airi.sh       # Launcher script
-└── .github/
-    └── workflows/
-        └── build-repo.yml # CI/CD workflow
+├── .github/
+│   └── workflows/
+│       └── build-repo.yml # CI/CD workflow
+├── CLAUDE.md             # Developer instructions
+└── README.md             # This file
 ```
+
+## Troubleshooting
+
+### Application won't start
+
+1. Ensure Electron is installed: `pacman -S electron40`
+2. Check for missing dependencies: `pacman -S xsel`
+
+### Wayland issues
+
+If Wayland mode doesn't work, try:
+```bash
+airi --wayland --enable-features=UseOzonePlatform --ozone-platform=wayland
+```
+
+### GPU acceleration problems
+
+Add to `~/.config/airi-flags.conf`:
+```bash
+--disable-gpu
+--disable-software-rasterizer
+```
+
+## Contributing
+
+Contributions are welcome! Please feel free to submit issues or pull requests.
 
 ## License
 
-- **AIRI**: MIT License (see [upstream LICENSE](https://github.com/moeru-ai/airi/blob/main/LICENSE))
+- **AIRI**: MIT License ([upstream LICENSE](https://github.com/moeru-ai/airi/blob/main/LICENSE))
 - **This Repository**: MIT License
 
 ## Acknowledgments
